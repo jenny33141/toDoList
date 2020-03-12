@@ -5,9 +5,15 @@ import "./App.css";
 class App extends Component {
   state = {
     inputText: "",
-    items: []
+    items: [],
+    list: null
   };
-
+  async componentDidMount() {
+    const data = await fetch("http://localhost:3010/data");
+    const response = await data.json();
+    console.log(response);
+    this.setState({ list: response });
+  }
   changeHandler = e => {
     this.setState({ inputText: e.target.value });
   };
