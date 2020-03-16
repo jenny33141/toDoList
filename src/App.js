@@ -1,43 +1,50 @@
 import React, { Component } from "react";
-import logo from "./logo.svg";
 import "./App.css";
 
 class App extends Component {
   state = {
     inputText: "",
     items: [],
-    list: null
+    list: []
   };
   async componentDidMount() {
     const data = await fetch("http://localhost:3010/data");
     const response = await data.json();
-    console.log(response);
-    this.setState({ list: response });
+    this.setState({ list: response.data });
   }
+
+
   changeHandler = e => {
     this.setState({ inputText: e.target.value });
   };
 
-  removeHandler = index => {
-    let listItems = this.state.items;
-    listItems.splice(index, 1);
-    this.setState({ items: listItems });
+  removeHandler = event => {
+
+    let temp = this.state.list
+    let locate = temp[event.target.id].todo
+
+    temp.splice(event.target.id, 1)
+    console.log(locate)
+
+    fetch(`http://localhost:3010/remove?address=${locate}`);
+    this.setState({ list: temp })
   };
 
-  onSubmit = event => {
-    event.preventDefault();
-    this.setState({
-      inputText: "",
-      items: [...this.state.items, this.state.inputText]
-    });
+  onSubmit = () => {
+
+    if (this.state.inputText !== "") {
+      let newItem = this.state.inputText
+      let temp = this.state.list
+      temp.push(newItem)
+      fetch(`http://localhost:3010/add?address=${newItem}`);
+    }
   };
 
   render() {
-    console.log(this.state.items);
     return (
       <div className="container">
         <div className="board">
-          <h1 class="header">My To Do List</h1>
+          <h1 className="header">My To Do List</h1>
           <div className="button">
             <form onSubmit={this.onSubmit}>
               <input
@@ -50,7 +57,7 @@ class App extends Component {
             </form>
           </div>
           <div className="list">
-            <List items={this.state.items} removeHandler={this.removeHandler} />
+            <List items={this.state.list} removeHandler={this.removeHandler} />
           </div>
         </div>
       </div>
@@ -61,8 +68,8 @@ const List = props => (
   <ul>
     {props.items.map((item, index) => (
       <li key={index}>
-        {item}
-        <button className="delete" onClick={() => props.removeHandler(index)}>
+        {item.todo}
+        <button id={index} className="delete" onClick={props.removeHandler}>
           x
         </button>
       </li>
